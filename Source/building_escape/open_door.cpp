@@ -3,6 +3,7 @@
 #include "open_door.h"
 #include <math.h>
 #include "GameFramework/Actor.h"
+#include "Engine/World.h"
 
 // Sets default values for this component's properties
 Uopen_door::Uopen_door()
@@ -11,7 +12,7 @@ Uopen_door::Uopen_door()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	// ...
+	is_open = false;
 }
 
 
@@ -19,45 +20,49 @@ Uopen_door::Uopen_door()
 void Uopen_door::BeginPlay()
 {
 	Super::BeginPlay();
-
-
-
-	
+	actor_that_opens = GetWorld()->GetFirstPlayerController()->GetPawn();
 }
-
 
 // Called every frame
 void Uopen_door::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	AActor *owner = GetOwner();
-
-	static int frame = 0;
-	static float yaw_change = 0;
-	const int FRAMES_TILL_CHANGE = 1;
-	static float yaw_amount = 0.25;
-
-	frame += 1;
-	if (frame == FRAMES_TILL_CHANGE) {
-		FRotator curr_rot = owner->GetActorRotation();
-		FRotator new_rot = FRotator(curr_rot.Pitch, curr_rot.Yaw + yaw_amount, curr_rot.Roll);
-
-		if (yaw_change >= 90.0) {
-			FString object_name = owner->GetName();
-			UE_LOG(LogTemp, Warning, TEXT("performed rotation on %s, yaw_amount is %f, yaw_change is %f"), *object_name, yaw_amount, yaw_change);
-
-			yaw_amount *= -1;
-			yaw_change = 0;
-		}
-
-		owner->SetActorRotation(new_rot, static_cast<ETeleportType>(NULL));
-		yaw_change += fabs(yaw_amount);
-
-		frame = 0;
-
+	if (!is_open && pressure_plate->IsOverlappingActor(actor_that_opens)) {
+		open_door();
 	}
 
+	if (is_open && !pressure_plate->IsOverlappingActor(actor_that_opens)) {
+		close_door();
+	}
+}
+
+void Uopen_door::open_door()
+{
+	float yaw_amount = 90.0;
+	move_door(yaw_amount);
+	is_open = true;
+}
+void Uopen_door::close_door()
+{
+	float yaw_amount = -90.0;
+	move_door(yaw_amount);
+	is_open = false;
+}
+
+void Uopen_door::move_door(float &yaw_amount, bool log)
+{
+	AActor *owner = GetOwner();
+	FRotator curr_rot = owner->GetActorRotation();
+	FRotator new_rot = FRotator(curr_rot.Pitch, curr_rot.Yaw + yaw_amount, curr_rot.Roll);
+
+	FString object_name;
+	if (log) {
+		object_name = owner->GetName();
+		UE_LOG(LogTemp, Warning, TEXT("performed rotation on %s, rotated %f amount"), *object_name, yaw_amount)
+	}
+
+
+	owner->SetActorRotation(new_rot, ETeleportType::None);
 
 }
 
