@@ -1,0 +1,4 @@
+#!/bin/bash
+built_files=(".vs" "Binaries" "Build" "Intermediate" "Saved" "building_escape.sln") 
+echo "Removing: ${built_files[@]}"
+rm -rf ${built_files[@]}
