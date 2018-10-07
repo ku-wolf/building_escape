@@ -20,6 +20,7 @@ Uopen_door::Uopen_door()
 void Uopen_door::BeginPlay()
 {
 	Super::BeginPlay();
+	owner = GetOwner();
 	actor_that_opens = GetWorld()->GetFirstPlayerController()->GetPawn();
 }
 
@@ -29,9 +30,11 @@ void Uopen_door::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	if (!is_open && pressure_plate->IsOverlappingActor(actor_that_opens)) {
 		open_door();
+		last_door_open_time = GetWorld()->GetTimeSeconds();
 	}
 
-	if (is_open && !pressure_plate->IsOverlappingActor(actor_that_opens)) {
+	int current_time = GetWorld()->GetTimeSeconds();
+	if (is_open && current_time - last_door_open_time > door_close_delay && !pressure_plate->IsOverlappingActor(actor_that_opens)) {
 		close_door();
 	}
 }

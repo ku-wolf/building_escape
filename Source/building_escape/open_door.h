@@ -40,6 +40,11 @@ private:
 	UPROPERTY(EditAnywhere)
 	AActor* actor_that_opens; // remember pawn inherits from actor
 
+	UPROPERTY(EditAnywhere)
+	float door_close_delay;
+
+	float last_door_open_time;
+	AActor *owner;
 	bool is_open;
 
 };
