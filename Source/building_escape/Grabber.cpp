@@ -2,6 +2,7 @@
 
 #include "Grabber.h"
 #include "Engine/World.h"
+#include "Components/PrimitiveComponent.h"
 #include "Runtime/Engine/Public/DrawDebugHelpers.h"
 #define OUT
 
@@ -93,7 +94,20 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 
 	// if the physics handle is attached
 		// move object
+	if (physics_handle->GrabbedComponent)
+	{
+		FVector PlayerViewPointLocation;
+		FRotator PlayerViewPointRotation;
+		GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
+			OUT PlayerViewPointLocation,
+			OUT PlayerViewPointRotation
+		);
 
+		//UE_LOG(LogTemp, Warning, TEXT("location %s. rotation %s"), *PlayerViewPointLocation.ToString(), *PlayerViewPointRotation.ToString())
+		FVector LineTraceEnd = PlayerViewPointLocation + (PlayerViewPointRotation.Vector() * Reach);
+		physics_handle->SetTargetLocation(LineTraceEnd);
+	
+	}
 
 }
 
@@ -102,15 +116,25 @@ void UGrabber::grab()
 	UE_LOG(LogTemp, Warning, TEXT("grabbin ya!"))
 
 	//line trace and try and reach any actors with physics body collision channel set
-	get_first_physics_body_in_reach();
+	auto hit_result = get_first_physics_body_in_reach();
+	auto component_to_grab = hit_result.GetComponent();
+
 	// TODO if we hit something attach physics handle to it
+	if (component_to_grab) {
+		physics_handle->GrabComponent(
+			component_to_grab,
+			NAME_None,
+			component_to_grab->GetOwner()->GetActorLocation(),
+			true
+		);
+	}
 }
 
 void UGrabber::release()
 {
 	UE_LOG(LogTemp, Warning, TEXT("released ya!"))
 
-	// TODO release handleS
+	physics_handle->ReleaseComponent();
 }
 
 
