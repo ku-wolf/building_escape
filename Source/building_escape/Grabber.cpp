@@ -11,8 +11,6 @@ UGrabber::UGrabber()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
 
@@ -21,22 +19,24 @@ void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
+	find_physics_handle_component();
+	setup_input_component();
+}
 
-	physics_handle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-	if (physics_handle) {
-
+void UGrabber::setup_input_component()
+{
+	input_comp = GetOwner()->FindComponentByClass<UInputComponent>();
+	if (input_comp) {
+		input_comp->BindAction("Grab", IE_Pressed, this, &UGrabber::grab);
+		input_comp->BindAction("Grab", IE_Released, this, &UGrabber::release);
 	}
 	else {
-		UE_LOG(LogTemp, Error, TEXT("%s missing UPhysicsHandleComponent"), *(GetOwner()->GetName()))
+		UE_LOG(LogTemp, Error, TEXT("%s missing UInputComponent"), *(GetOwner()->GetName()))
 	}
 }
 
-
-// Called every frame
-void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+const FHitResult UGrabber::get_first_physics_body_in_reach()
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	FVector PlayerViewPointLocation;
 	FRotator PlayerViewPointRotation;
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
@@ -71,5 +71,46 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 		UE_LOG(LogTemp, Warning, TEXT("hit actor: %s"), *(hit_actor->GetName()))
 	}
 
+	return Hit;
 }
+
+void UGrabber::find_physics_handle_component()
+{
+	physics_handle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
+	if (physics_handle) {
+
+	}
+	else {
+		UE_LOG(LogTemp, Error, TEXT("%s missing UPhysicsHandleComponent"), *(GetOwner()->GetName()))
+	}
+}
+
+
+// Called every frame
+void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	// if the physics handle is attached
+		// move object
+
+
+}
+
+void UGrabber::grab()
+{
+	UE_LOG(LogTemp, Warning, TEXT("grabbin ya!"))
+
+	//line trace and try and reach any actors with physics body collision channel set
+	get_first_physics_body_in_reach();
+	// TODO if we hit something attach physics handle to it
+}
+
+void UGrabber::release()
+{
+	UE_LOG(LogTemp, Warning, TEXT("released ya!"))
+
+	// TODO release handleS
+}
+
 
