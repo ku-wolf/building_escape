@@ -32,7 +32,9 @@ private:
 	UInputComponent *input_comp = nullptr;
 	void grab();
 	void release();
+	const FHitResult get_first_object_in_reach(ECollisionChannel collision_channel);
 	void find_physics_handle_component();
 	void setup_input_component();
-	const FHitResult get_first_physics_body_in_reach();
+	FVector get_reach_line_end();
+	FVector get_reach_line_start()
 };
