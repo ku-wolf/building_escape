@@ -36,5 +36,5 @@ private:
 	void find_physics_handle_component();
 	void setup_input_component();
 	FVector get_reach_line_end();
-	FVector get_reach_line_start()
+	FVector get_reach_line_start();
 };
