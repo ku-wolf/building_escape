@@ -4,6 +4,8 @@
 #include <math.h>
 #include "GameFramework/Actor.h"
 #include "Engine/World.h"
+#include "Components/PrimitiveComponent.h"
+#define OUT
 
 // Sets default values for this component's properties
 Uopen_door::Uopen_door()
@@ -21,20 +23,46 @@ void Uopen_door::BeginPlay()
 {
 	Super::BeginPlay();
 	owner = GetOwner();
-	actor_that_opens = GetWorld()->GetFirstPlayerController()->GetPawn();
+}
+
+float Uopen_door::get_total_mass_of_actors_on_plate()
+{
+	static float last_total_mass = 0.f;
+	float total_mass = 0.f;
+	TArray<AActor*> overlapping_actors;
+
+	pressure_plate->GetOverlappingActors(
+		OUT overlapping_actors
+	);
+
+	for (const auto &actor : overlapping_actors) 
+	{
+		total_mass += actor->FindComponentByClass<UPrimitiveComponent>()->GetMass();
+		//UE_LOG(LogTemp, Warning, TEXT("actor %s is on trigger."), *actor->GetName())
+	}
+
+	if (last_total_mass != total_mass)
+	{
+		last_total_mass = total_mass;
+		UE_LOG(LogTemp, Warning, TEXT("total mass is %f"), last_total_mass);
+	}
+	
+	return total_mass;
 }
 
 // Called every frame
 void Uopen_door::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if (!is_open && pressure_plate->IsOverlappingActor(actor_that_opens)) {
+
+	bool sufficient_mass_on_plate = get_total_mass_of_actors_on_plate() >= trigger_mass;
+	if (!is_open && sufficient_mass_on_plate)
+	{
 		open_door();
-		last_door_open_time = GetWorld()->GetTimeSeconds();
 	}
 
-	int current_time = GetWorld()->GetTimeSeconds();
-	if (is_open && current_time - last_door_open_time > door_close_delay && !pressure_plate->IsOverlappingActor(actor_that_opens)) {
+	if (is_open && !sufficient_mass_on_plate)
+	{
 		close_door();
 	}
 }

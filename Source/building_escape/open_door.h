@@ -20,6 +20,9 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	// Get total mass of actors on plate
+	float get_total_mass_of_actors_on_plate();
+
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -38,10 +41,7 @@ private:
 	ATriggerVolume* pressure_plate;
 
 	UPROPERTY(EditAnywhere)
-	AActor* actor_that_opens; // remember pawn inherits from actor
-
-	UPROPERTY(EditAnywhere)
-	float door_close_delay;
+	float trigger_mass;
 
 	float last_door_open_time;
 	AActor *owner;
