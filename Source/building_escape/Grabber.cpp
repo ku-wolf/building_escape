@@ -93,6 +93,8 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 
 	// if the physics handle is attached
 		// move object
+	if (!physics_handle){ return; }
+
 	if (physics_handle->GrabbedComponent)
 	{
 		physics_handle->SetTargetLocation(get_reach_line_end());
@@ -102,6 +104,7 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 
 void UGrabber::grab()
 {
+	if (!physics_handle) { return;  }
 	//line trace and try and reach any actors with physics body collision channel set
 	auto hit_result = get_first_object_in_reach(ECollisionChannel::ECC_PhysicsBody);
 	auto component_to_grab = hit_result.GetComponent();
@@ -119,5 +122,6 @@ void UGrabber::grab()
 
 void UGrabber::release()
 {
+	if (!physics_handle) { return; }
 	physics_handle->ReleaseComponent();
 }

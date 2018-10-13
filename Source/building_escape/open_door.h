@@ -8,13 +8,13 @@
 #include "open_door.generated.h"
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class BUILDING_ESCAPE_API Uopen_door : public UActorComponent
+class BUILDING_ESCAPE_API UOpen_door : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
 	// Sets default values for this component's properties
-	Uopen_door();
+	UOpen_door();
 
 protected:
 	// Called when the game starts
@@ -38,13 +38,13 @@ private:
 	float open_angle = 90.0f;
 
 	UPROPERTY(EditAnywhere)
-	ATriggerVolume* pressure_plate;
+	ATriggerVolume* pressure_plate = nullptr;
 
 	UPROPERTY(EditAnywhere)
 	float trigger_mass;
 
 	float last_door_open_time;
-	AActor *owner;
 	bool is_open;
 
+	void check_for_pressure_plate();
 };

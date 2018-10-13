@@ -8,7 +8,7 @@
 #define OUT
 
 // Sets default values for this component's properties
-Uopen_door::Uopen_door()
+UOpen_door::UOpen_door()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
@@ -19,14 +19,24 @@ Uopen_door::Uopen_door()
 
 
 // Called when the game starts
-void Uopen_door::BeginPlay()
+void UOpen_door::BeginPlay()
 {
 	Super::BeginPlay();
-	owner = GetOwner();
+	check_for_pressure_plate();
 }
 
-float Uopen_door::get_total_mass_of_actors_on_plate()
+void UOpen_door::check_for_pressure_plate()
 {
+	if (!pressure_plate)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s missing pressure_plate ATriggerVolume"), *(GetOwner()->GetName()))
+	}
+}
+
+float UOpen_door::get_total_mass_of_actors_on_plate()
+{
+	if (!pressure_plate) { return 0.f; }
+
 	static float last_total_mass = 0.f;
 	float total_mass = 0.f;
 	TArray<AActor*> overlapping_actors;
@@ -38,7 +48,6 @@ float Uopen_door::get_total_mass_of_actors_on_plate()
 	for (const auto &actor : overlapping_actors) 
 	{
 		total_mass += actor->FindComponentByClass<UPrimitiveComponent>()->GetMass();
-		//UE_LOG(LogTemp, Warning, TEXT("actor %s is on trigger."), *actor->GetName())
 	}
 
 	if (last_total_mass != total_mass)
@@ -51,7 +60,7 @@ float Uopen_door::get_total_mass_of_actors_on_plate()
 }
 
 // Called every frame
-void Uopen_door::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UOpen_door::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
@@ -67,20 +76,20 @@ void Uopen_door::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 	}
 }
 
-void Uopen_door::open_door()
+void UOpen_door::open_door()
 {
 	float yaw_amount = 90.0;
 	move_door(yaw_amount);
 	is_open = true;
 }
-void Uopen_door::close_door()
+void UOpen_door::close_door()
 {
 	float yaw_amount = -90.0;
 	move_door(yaw_amount);
 	is_open = false;
 }
 
-void Uopen_door::move_door(float &yaw_amount, bool log)
+void UOpen_door::move_door(float &yaw_amount, bool log)
 {
 	AActor *owner = GetOwner();
 	FRotator curr_rot = owner->GetActorRotation();
